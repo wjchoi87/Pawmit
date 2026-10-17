@@ -1,0 +1,8 @@
+.build/
+.swiftpm/
+build/
+.agents/
+.DS_Store
+*.xcuserstate
+xcuserdata/
+CLAUDE.md

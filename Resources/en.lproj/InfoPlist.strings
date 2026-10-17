@@ -1,0 +1,5 @@
+/* Info.plist localization (English) */
+"NSAppleEventsUsageDescription" = "Used to jump to the terminal tab (iTerm2, Terminal) that sent an agent notification.";
+"NSAccessibilityUsageDescription" = "Used when the pet walks to the Dock trash and rummages through it.";
+"CFBundleTypeName" = "Pawmit pet";
+"UTTypeDescription" = "Pawmit pet";
