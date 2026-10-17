@@ -1125,7 +1125,7 @@ final class Director: NSObject, NSMenuDelegate {
 
     // MARK: - 설정 창이 쓰는 API
 
-    private let settingsWindow = SettingsWindowController()
+    let settingsWindow = SettingsWindowController()
     private var wizardWindow: WizardWindowController?
     private var makerWindows: [MakerWindowController] = []
 

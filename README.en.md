@@ -140,13 +140,15 @@ pawmit pet new "sprout-potato" --skeleton biped
 pawmit pet preview sprout-potato
 ```
 
-### Sharing pets
+### Sharing and backing up pets
 
-Settings → Pet → **Export…** makes a `.pawmitpet` file; the recipient double-clicks it (or uses **Import…**) to bring the pet home.
+Settings → Pet → **This pet only…** makes a `.pawmitpet` file; the recipient double-clicks it (or uses **Import…**) to bring the pet home.
+**Export all…** backs up every custom pet and your pet settings (built-in styles, cat coat, main pet, friends) in one file. Importing it on another Mac restores the pets and settings, skipping pets you already have.
 Imports show their contents for confirmation first, and accept nothing but art and pet.json.
 
 ```bash
 pawmit pet export mint-bunny -o mint-bunny.pawmitpet
+pawmit pet export --all -o pawmit-pets.pawmitpet   # full backup
 ```
 
 ```bash

@@ -141,13 +141,15 @@ pawmit pet new "새싹감자" --skeleton biped
 pawmit pet preview 새싹감자
 ```
 
-### 펫 주고받기
+### 펫 주고받기·백업
 
-설정 → 펫 → **내보내기…** 로 `.pawmitpet` 파일을 만들어 건네면, 받은 사람은 파일을 더블클릭(또는 **가져오기…**)해서 데려옵니다.
+설정 → 펫 → **지금 펫만…** 으로 `.pawmitpet` 파일을 만들어 건네면, 받은 사람은 파일을 더블클릭(또는 **가져오기…**)해서 데려옵니다.
+**모두 내보내기…** 는 커스텀 펫 전부와 펫 설정(기본 펫 스타일·고양이 털색·메인 펫·친구)을 파일 하나로 백업합니다. 다른 Mac에서 가져오면 펫과 설정을 그대로 되돌릴 수 있고, 이미 있는 똑같은 펫은 건너뜁니다.
 가져올 때 내용을 먼저 보여주고 확인을 받으며, 그림·pet.json 외의 파일은 받지 않습니다.
 
 ```bash
 pawmit pet export mint-bunny -o mint-bunny.pawmitpet
+pawmit pet export --all -o pawmit-pets.pawmitpet   # 전체 백업
 ```
 
 ```bash

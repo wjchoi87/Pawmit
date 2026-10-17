@@ -305,6 +305,28 @@ enum PetRef {
     }
 }
 
+/// 백업 파일 가져오기: 펫을 풀고, 물어본 뒤 펫 설정도 되돌린다
+func importBackup(_ data: Data, yes: Bool) throws -> Int32 {
+    let s = try PetBackup.inspect(data)
+    print(msgF("백업: 펫 %lld마리 %@", "backup: %lld pet(s) %@", s.petNames.count, s.petNames.joined(separator: ", ")))
+    if !yes, !confirm(msg("~/.pawmit/pets 에 가져올까요? (같은 펫은 건너뜀)", "Import into ~/.pawmit/pets? (identical pets are skipped)")) { print(msg("취소", "cancelled")); return 1 }
+    try PawmitPaths.ensureHome()
+    let result = try PetBackup.restore(data, into: PawmitPaths.petsDir)
+    print(msgF("새 펫 %lld마리, 건너뜀 %lld마리", "%lld new, %lld skipped", result.installed.count, result.skipped.count))
+    if let settings = s.settings, yes || confirm(msg("펫 설정(기본 펫 스타일·메인 펫·친구)도 백업대로 되돌릴까요?", "Also restore pet settings (built-in styles, main pet, friends)?")) {
+        var config = PawmitConfig.load()
+        settings.apply(to: &config, renamed: result.renamed) { id in
+            if PetCatalog.builtin(id) != nil { return true }
+            if id.hasPrefix("folder:") { return FileManager.default.fileExists(atPath: PawmitPaths.petsDir.appendingPathComponent(String(id.dropFirst(7))).path) }
+            if id.hasPrefix("codex:") { return FileManager.default.fileExists(atPath: String(id.dropFirst(6))) }
+            return false
+        }
+        try config.save()
+        print(msg("펫 설정을 되돌렸어요 (앱이 켜져 있으면 바로 바뀌어요)", "pet settings restored (applies immediately if the app is running)"))
+    }
+    return 0
+}
+
 func readPetJSON(_ folder: URL) -> JSONValue? {
     (try? Data(contentsOf: folder.appendingPathComponent("pet.json"))).flatMap { JSONValue.parse($0) }
 }
@@ -442,8 +464,22 @@ func runPet(_ rest: [String]) -> Int32 {
         for i in issues { print("✗ \(i)") }
         return 1
 
+    case "export" where args.contains("--all"):
+        // 커스텀 펫 전부 + 펫 설정 백업
+        do {
+            let (data, left) = try PetBackup.export(petsDir: PawmitPaths.petsDir, config: PawmitConfig.load())
+            let out = URL(fileURLWithPath: ((option("-o", "--output") ?? "pawmit-pets.\(PetBundle.fileExtension)") as NSString).expandingTildeInPath)
+            try data.write(to: out, options: .atomic)
+            for name in left { stderr(msgF("빠진 펫 (그림 없음·너무 큼): %@", "left out (no art or too large): %@", name)) }
+            print(out.path)
+            return 0
+        } catch {
+            stderr(msgF("내보내지 못했어요: %@", "could not export: %@", error.localizedDescription))
+            return 1
+        }
+
     case "export":
-        guard let ref = args.first.flatMap(PetRef.init) else { stderr(msg("usage: pawmit pet export <펫> [-o 파일.pawmitpet]", "usage: pawmit pet export <pet> [-o file.pawmitpet]")); return 2 }
+        guard let ref = args.first.flatMap(PetRef.init) else { stderr(msg("usage: pawmit pet export <펫> [-o 파일.pawmitpet] | --all [-o 파일]", "usage: pawmit pet export <pet> [-o file.pawmitpet] | --all [-o file]")); return 2 }
         do {
             let data: Data
             let base: String
@@ -471,6 +507,7 @@ func runPet(_ rest: [String]) -> Int32 {
         guard let file = args.first else { stderr(msg("usage: pawmit pet import <파일.pawmitpet> [--name 폴더] [--yes]", "usage: pawmit pet import <file.pawmitpet> [--name folder] [--yes]")); return 2 }
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: (file as NSString).expandingTildeInPath))
+            if PetBackup.isBackup(data) { return try importBackup(data, yes: yes) }
             let s = try PetBundle.inspect(data)
             print(msgF("'%@' (%@, 그림 %lld장)", "'%@' (%@, %lld image(s))", s.name, s.kind, s.fileNames.count))
             for w in s.warnings { print("  ⚠️ \(w)") }
@@ -520,7 +557,8 @@ func runPet(_ rest: [String]) -> Int32 {
           pawmit pet validate <펫|pet.json|파일>    정의 검사
           pawmit pet preview <펫|폴더>              포즈 모음 PNG 만들기 (앱 실행 중일 때, 설치 전 폴더도 가능)
           pawmit pet export <펫> [-o 파일]          .pawmitpet 파일로 내보내기
-          pawmit pet import <파일> [--name 폴더]    .pawmitpet 가져오기 (--yes: 확인 생략)
+          pawmit pet export --all [-o 파일]         커스텀 펫 전부 + 펫 설정 백업
+          pawmit pet import <파일> [--name 폴더]    .pawmitpet·백업 가져오기 (--yes: 확인 생략)
           pawmit pet use <펫>                      메인 펫으로 쓰기
 
         <펫>: 기본 펫 id(mongle banban tokki nalda bamtol haedal cat), ~/.pawmit/pets 폴더 이름, 또는 폴더 경로
@@ -535,7 +573,8 @@ func runPet(_ rest: [String]) -> Int32 {
           pawmit pet validate <pet|pet.json|file>    validate a definition
           pawmit pet preview <pet|folder>              render a pose sheet PNG (app running; uninstalled folders OK)
           pawmit pet export <pet> [-o file]          export as .pawmitpet
-          pawmit pet import <file> [--name folder]    import a .pawmitpet (--yes: skip confirm)
+          pawmit pet export --all [-o file]          back up all custom pets + pet settings
+          pawmit pet import <file> [--name folder]    import a .pawmitpet or backup (--yes: skip confirm)
           pawmit pet use <pet>                      set as the main pet
 
         <pet>: built-in id (mongle banban tokki nalda bamtol haedal cat), a ~/.pawmit/pets folder name, or a folder path

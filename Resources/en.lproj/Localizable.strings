@@ -132,6 +132,7 @@
 "~ 형식 정리" = "~ tidied formatting";
 "~/.pawmit 폴더를 만들 수 없어요: %@" = "Couldn't create the ~/.pawmit folder: %@";
 "~/.pawmit/pets 에 새 폴더로 저장돼요. 기존 펫은 덮어쓰지 않아요." = "Saved as a new folder under ~/.pawmit/pets. Existing pets are not overwritten.";
+"~/.pawmit/pets 에 새 폴더로 저장돼요. 이미 있는 똑같은 펫은 건너뛰고, 기존 펫은 덮어쓰지 않아요." = "Pets are saved as new folders in ~/.pawmit/pets. Identical pets are skipped, and existing pets are never overwritten.";
 "‘%@’ 모드" = "‘%@’ mode";
 "… (%lld줄 더)" = "… (%lld more lines)";
 "← 뒤로" = "← Back";
@@ -183,6 +184,7 @@
 "그림을 새로 놓아 바꾸거나 ✕로 뺄 수 있어요. 가만히(idle)는 못 뺀다. 저장하면 같은 펫 폴더에 덮어써요." = "Drop in new art to swap, or remove it with ✕. Idle can't be removed. Saving overwrites the same pet folder.";
 "그림을 읽을 수 없습니다: %@" = "Couldn't read image: %@";
 "그림을 읽을 수 없어요" = "Couldn't read the image";
+"그림이 없거나 너무 커서 담지 못했어요: %@" = "These had no art or were too large: %@";
 "그림이 왼쪽을 보고 있어요" = "The image faces left";
 "글꼴" = "Font";
 "글씨" = "Words";
@@ -268,6 +270,7 @@
 "대화하기…" = "Chat…";
 "대화할 AI CLI(claude 또는 codex)를 찾지 못했어요. 설정 → 대화에서 다른 provider를 골라 주세요." = "Couldn't find a chat CLI (claude or codex). Pick another provider in Settings → Chat.";
 "대화할 때 존댓말" = "Speak politely in chat";
+"더 새로운 버전(%lld)의 백업 파일입니다. Pawmit을 업데이트해 주세요" = "This backup is from a newer version (%lld). Please update Pawmit";
 "더 새로운 버전(%lld)의 펫 파일입니다. Pawmit을 업데이트해 주세요" = "This pet file is from a newer version (%lld). Please update Pawmit";
 "데려가기" = "Take it home";
 "데스크탑 펫 + 코딩 에이전트 승인 도우미. 가져온 오픈소스와 라이선스는 THIRD_PARTY_NOTICES.md에 있어요." = "Desktop pet + coding agent approval helper. Open source we borrowed and its licenses are in THIRD_PARTY_NOTICES.md.";
@@ -330,6 +333,7 @@
 "모델 목록 다시 불러오기" = "Reload model list";
 "모델 목록을 못 불러왔어요: %@" = "Couldn't load the model list: %@";
 "모델 직접 입력" = "Enter model manually";
+"모두 내보내기…" = "Export all…";
 "모두 지우기" = "Erase all";
 "모든 창 위 (클릭은 통과)" = "Above all windows (clicks pass through)";
 "모든 화면 전체" = "All screens, full area";
@@ -365,6 +369,7 @@
 "반짝" = "Sparkle";
 "받아라~!" = "Here it comes~!";
 "받은 .pawmitpet 파일로 펫을 데려와요" = "Bring in a pet from a .pawmitpet file you received";
+"받은 .pawmitpet 파일이나 백업 파일로 펫을 데려와요" = "Bring pets in from a .pawmitpet file or a backup";
 "발자국" = "Footprints";
 "밤 모자" = "chestnut cap";
 "밥 먹을 시간~" = "Time to eat~";
@@ -378,6 +383,8 @@
 "배 색 따로" = "Separate belly color";
 "배고파요" = "hungry";
 "배부름 %lld · 기운 %lld · 재미 %lld · 애정 %lld" = "Fullness %lld · Energy %lld · Fun %lld · Affection %lld";
+"백업 파일이 너무 큽니다 (최대 %lldMB)" = "The backup is too large (max %lldMB)";
+"백업에서 펫 %lld마리를 가져올까요?" = "Import %lld pet(s) from the backup?";
 "버전" = "Version";
 "버전 표기를 이해할 수 없어요 (예: 0.3.0)." = "Couldn't parse the version string (e.g. 0.3.0).";
 "번개" = "Lightning";
@@ -500,6 +507,7 @@
 "옮기기" = "Move";
 "완성! 🎉" = "Done! 🎉";
 "왕관" = "Crown";
+"외 %lld마리" = "and %lld more";
 "외곽선" = "Outline";
 "외부 도구 써도 돼?" = "Can I use this external tool?";
 "왼귀" = "left ear";
@@ -528,10 +536,12 @@
 "이모지" = "Emoji";
 "이미 깨끗해! ✨" = "Already clean! ✨";
 "이미 연결돼 있어요." = "Already connected.";
+"이미 있는 펫 %lld마리는 건너뛰었어요." = "Skipped %lld pet(s) you already have.";
 "이미 최신 버전이에요! (%@)" = "You're already up to date! (%@)";
 "이어서 시킬 말…" = "What to say next…";
 "인상파 강가" = "Impressionist riverbank";
 "일반" = "General";
+"일부 펫은 빠졌어요" = "Some pets were left out";
 "읽어봐도 돼?" = "Can I read this?";
 "입" = "Mouth";
 "입력이 필요하대!" = "They need input!";
@@ -579,6 +589,7 @@
 "지금 시속 %lldkm! 쌩쌩 달릴 수 있어 💨" = "%lld km/h right now! I can zip along 💨";
 "지금 업데이트" = "Update now";
 "지금 펫" = "Current pet";
+"지금 펫만…" = "This pet only…";
 "지금 펫을 .pawmitpet 파일로 저장해 다른 사람에게 줄 수 있어요" = "Save the current pet as a .pawmitpet file to share with someone";
 "지금 확인" = "Check now";
 "지우개" = "Eraser";
@@ -608,6 +619,9 @@
 "커스텀 펫" = "Custom pet";
 "커스텀 펫 만들기" = "Make a Custom Pet";
 "커스텀 펫 만들기…" = "Make a custom pet…";
+"커스텀 펫 전부와 기본 펫 설정(스타일·메인 펫·친구)을 파일 하나로 저장해요. 가져오기로 그대로 복원할 수 있어요." = "Saves every custom pet and your built-in pet settings (styles, main pet, friends) in one file. Import it to restore everything.";
+"커스텀 펫 전부와 펫 설정(기본 펫 스타일·메인 펫·친구)을 파일 하나로 백업해요" = "Back up every custom pet and your pet settings (built-in styles, main pet, friends) in one file";
+"커스텀 펫은 없고 펫 설정만 있어요." = "No custom pets, only pet settings.";
 "켜면 외곽선 없이 부위 안쪽에만 칠해요 (점·배·귀 안쪽)" = "When on, only the inside of the part is filled, with no outline (dots, belly, inner ears)";
 "코" = "nose";
 "콩알" = "Dot";
@@ -632,13 +646,18 @@
 "펜" = "Pen";
 "펜·동그라미로 그리거나 그림을 넣어요" = "Draw with the pen or circles, or add an image";
 "펫" = "Pet";
+"펫 %lld마리를 가져왔어요" = "Imported %lld pet(s)";
 "펫 메이커" = "Pet Maker";
 "펫 메이커 — %@" = "Pet Maker — %@";
 "펫 메이커 — 완전히 새로 만들기" = "Pet Maker — Start from scratch";
+"펫 설정(기본 펫 스타일·메인 펫·친구)도 백업대로 되돌릴 수 있어요." = "You can also restore your pet settings (built-in styles, main pet, friends) from the backup.";
 "펫 정의(pet)도 그림도 없습니다" = "No pet definition and no images";
 "펫 폴더" = "Pets folder";
 "펫 혼잣말과 대화, 펫에서 거절할 때 에이전트에게 남기는 말에 써요. 비우면 ‘%@’." = "Used in pet monologues, chat, and the message left to the agent when the pet denies. Leave empty to use ‘%@’.";
 "펫과 나누는 대화에 써요. 마크다운은 펫(AI)의 답에만 적용돼요." = "Used for chatting with your pet. Markdown applies only to the pet's (AI) replies.";
+"펫과 설정 복원" = "Restore pets and settings";
+"펫만 가져오기" = "Import pets only";
+"펫이 너무 많습니다 (최대 %lld마리)" = "Too many pets (max %lld)";
 "펫이 부르는 내 호칭" = "What the pet calls me";
 "펫한테 닦아달라고 하기 🧽" = "Ask the pet to wipe 🧽";
 "평온해요" = "calm";

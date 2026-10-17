@@ -251,10 +251,12 @@ private struct PetTab: View {
                 }
                 LabeledContent("주고받기") {
                     HStack(spacing: 8) {
-                        Button("내보내기…") { model.director?.exportPetWithPanel(id: model.config.pet) }
+                        Button("모두 내보내기…") { model.director?.exportAllPetsWithPanel() }
+                            .help("커스텀 펫 전부와 펫 설정(기본 펫 스타일·메인 펫·친구)을 파일 하나로 백업해요")
+                        Button("지금 펫만…") { model.director?.exportPetWithPanel(id: model.config.pet) }
                             .help("지금 펫을 .pawmitpet 파일로 저장해 다른 사람에게 줄 수 있어요")
                         Button("가져오기…") { model.director?.importPetWithPanel(); model.refresh() }
-                            .help("받은 .pawmitpet 파일로 펫을 데려와요")
+                            .help("받은 .pawmitpet 파일이나 백업 파일로 펫을 데려와요")
                     }
                 }
             } header: {

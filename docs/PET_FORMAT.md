@@ -174,7 +174,7 @@ pawmit pet export mint-bunny -o mint-bunny.pawmitpet
 pawmit pet import mint-bunny.pawmitpet
 ```
 
-앱에서는 설정 → 펫 → **내보내기… / 가져오기…**, 또는 Finder에서 `.pawmitpet` 파일을 더블클릭합니다. 가져오기 전에 이름·종류·그림 목록을 보여주고 확인을 받으며, 기존 펫을 덮어쓰지 않고 새 폴더에 풉니다.
+앱에서는 설정 → 펫 → **지금 펫만… / 가져오기…**, 또는 Finder에서 `.pawmitpet` 파일을 더블클릭합니다. 가져오기 전에 이름·종류·그림 목록을 보여주고 확인을 받으며, 기존 펫을 덮어쓰지 않고 새 폴더에 풉니다.
 
 파일은 JSON 하나입니다. 코드로 그리는 펫은 그대로 읽고 고칠 수 있습니다.
 
@@ -185,6 +185,19 @@ pawmit pet import mint-bunny.pawmitpet
 ```
 
 가져올 때 막는 것: 그림(png·gif·webp·apng·jpg·heic) 외 파일, `../`·숨김 파일 이름, 읽을 수 없는 그림, 총 25MB·파일 64개 초과, 모르는 부위·잘못된 색.
+
+### 전체 백업
+
+**모두 내보내기…**(`pawmit pet export --all`)는 같은 확장자에 펫 여러 마리와 펫 설정을 담습니다. 가져오기는 파일 안의 `pawmitPets` 키로 백업인지 알아봅니다.
+
+```json
+{ "pawmitPets": 1,
+  "pets": { "mint-bunny": { "pawmitPet": 1, "name": "Mint Bunny", "pet": { … } } },
+  "settings": { "pet": "folder:mint-bunny", "friends": ["banban"], "catCoat": "cheese",
+                "behaviorSeed": "1234", "petStyles": { "mongle": { "colors": { "body": "#FFFFFF" } } } } }
+```
+
+펫마다 위와 같은 검사를 거치고, 하나라도 걸리면 아무것도 쓰지 않습니다. 같은 폴더에 똑같은 펫이 있으면 건너뛰고, 다른 펫이 있으면 번호를 붙인 새 폴더에 풀며 설정의 펫 id도 그 폴더로 바꿉니다. 백업 전체는 400MB·200마리까지입니다.
 
 ## 새 부위 추가 (코드)
 
