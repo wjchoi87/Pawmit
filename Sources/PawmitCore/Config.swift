@@ -17,8 +17,17 @@ public struct PawmitConfig: Codable, Equatable, Sendable {
     /// 고양이(cat) 털색: cheese, gray, black, white, tuxedo
     public var catCoat: String = "cheese"
     public var size: Double = 1.0
-    /// 자동 업데이트: update.json(버전·zip URL) 전체 URL. 비어 있으면 업데이트 확인을 건너뛴다.
-    public var updateURL: String? = nil
+    /*
+     변경 전 정책: updateURL 기본값은 비어 있음(nil) — 사용자가 주소를 넣어야만 자동 업데이트가 켜졌다.
+     변경 후 정책: 기본값은 공개 저장소 주소(GitHub Releases). 설정에 키가 없으면 기본 주소를 쓰고,
+                  빈 문자열("")이면 사용자가 끈 것으로 보고 확인하지 않는다.
+     변경 이유: 공개 저장소의 GitHub Releases로 배포하므로 설치만 하면 업데이트를 받게 하려고.
+     영향 범위: config.json에 updateURL이 없는 모든 사용자(시작 20초 뒤·주 1회 GitHub API 조회).
+                설정에서 주소를 지우면 ""로 저장돼 계속 꺼진 상태로 남는다.
+     */
+    /// 자동 업데이트 주소: GitHub 저장소 주소 또는 update.json URL. "" = 끔
+    public var updateURL: String? = PawmitConfig.defaultUpdateURL
+    public static let defaultUpdateURL = "https://github.com/wjchoi87/Pawmit"
     /// 말풍선 글씨 크기 배율 (말풍선 폭도 같이 커진다)
     public var textScale: Double = 1.0
     /// 말풍선 글꼴: nil = 둥근 시스템 글꼴, "system" = 기본 시스템 글꼴, 그 외 = 설치된 글꼴 family 이름
@@ -179,7 +188,8 @@ public struct PawmitConfig: Codable, Equatable, Sendable {
         behaviorSeed = try? c.decodeIfPresent(UInt64.self, forKey: .behaviorSeed)
         catCoat = v(.catCoat, d.catCoat)
         size = v(.size, d.size)
-        updateURL = try? c.decodeIfPresent(String.self, forKey: .updateURL)
+        // 키가 없거나 null이면 기본 주소, 빈 문자열이면 끈 상태 그대로
+        updateURL = (try? c.decodeIfPresent(String.self, forKey: .updateURL)) ?? d.updateURL
         textScale = v(.textScale, d.textScale)
         fontName = try? c.decodeIfPresent(String.self, forKey: .fontName)
         hookText = v(.hookText, d.hookText)

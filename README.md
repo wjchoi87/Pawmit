@@ -164,7 +164,10 @@ pawmit pet use mint-bunny     # 메인 펫으로
 
 ### 업데이트
 
-설정 → 일반 → 업데이트에 `update.json` 주소를 넣으면 주 1회 새 버전을 확인해 말풍선 카드로 알려 주고, 누르면 내려받아 설치하고 재시작합니다. 메뉴 → **업데이트 확인…** 으로 수동 확인도 가능합니다.
+기본으로 공개 저장소(`https://github.com/wjchoi87/Pawmit`)의 Releases를 주 1회 확인해 새 버전을 말풍선 카드로 알려 주고, 누르면 내려받아 설치하고 재시작합니다. 메뉴 → **업데이트 확인…** 으로 수동 확인도 가능합니다. 설정 → 일반 → 업데이트에서 주소를 바꾸거나, 비워서 끌 수 있습니다. 주소는 두 가지 방식을 지원합니다.
+
+1. **GitHub 저장소 주소** (예: `https://github.com/wjchoi87/Pawmit`) — 최신 Release의 태그를 버전으로 비교하고, Release에 첨부한 zip(`Pawmit-버전.zip`, 안에 `Pawmit.app`)을 내려받습니다. 릴리스 노트가 카드에 표시됩니다. 저장소가 public이어야 토큰 없이 읽힙니다.
+2. **update.json 직접 호스팅** — `{ "version": "0.3.0", "url": "https://…/Pawmit-0.3.0.zip", "notes": "바뀐 점" }`
 
 ### 대화 AI
 

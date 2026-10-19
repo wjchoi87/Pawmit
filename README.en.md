@@ -163,7 +163,10 @@ Everything also lives in `~/.pawmit/config.json`, and edits to the file apply im
 
 ### Updates
 
-Put an `update.json` URL in Settings → General → Update and it checks weekly, announces new versions as a speech-bubble card, and downloads, installs, and restarts on click. Manual check via Menu → **Check for Updates…**.
+By default it checks the public repository's releases (`https://github.com/wjchoi87/Pawmit`) weekly, announces new versions as a speech-bubble card, and downloads, installs, and restarts on click. Manual check via Menu → **Check for Updates…**. Change the address in Settings → General → Update, or clear it to turn updates off. Two kinds of address work:
+
+1. **GitHub repository URL** (e.g. `https://github.com/wjchoi87/Pawmit`) — compares the latest release tag with the running version and downloads the zip attached to that release (`Pawmit-<version>.zip`, containing `Pawmit.app`). Release notes show on the card. The repository must be public to be read without a token.
+2. **Self-hosted update.json** — `{ "version": "0.3.0", "url": "https://…/Pawmit-0.3.0.zip", "notes": "What changed" }`
 
 ### Chat AI
 

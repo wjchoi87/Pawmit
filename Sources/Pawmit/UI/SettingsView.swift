@@ -823,11 +823,14 @@ private struct GeneralTab: View {
                 LabeledContent("로그") { Button("열기") { NSWorkspace.shared.open(PawmitPaths.log) } }
             }
             Section("업데이트") {
-                TextField("update.json URL (예: https://example.com/pawmit/update.json)",
+                TextField("저장소 주소 (https://github.com/owner/Pawmit) 또는 update.json URL",
                           text: Binding(get: { model.config.updateURL ?? "" },
-                                        set: { v in model.update { $0.updateURL = v.isEmpty ? nil : v } }),
+                                        // 비우면 ""로 저장 — nil이면 다시 읽을 때 기본 주소로 돌아가 끌 수 없다
+                                        set: { v in model.update { $0.updateURL = v.trimmingCharacters(in: .whitespaces).isEmpty ? "" : v } }),
                           prompt: Text("비우면 자동 업데이트 끔"))
                     .font(.callout)
+                Text("GitHub 저장소 주소를 넣으면 최신 Release 태그와 첨부 zip(Pawmit-버전.zip)으로 확인해요.")
+                    .font(.caption).foregroundStyle(.secondary)
                 LabeledContent("새 버전 확인") {
                     Button("지금 확인") { model.director?.checkForUpdates(auto: false) }
                         .help("새 버전이 있으면 말풍선으로 알려줘요. 실행 중에도 주 1회 자동으로 확인해요.")

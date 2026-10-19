@@ -14,8 +14,10 @@ final class Director: NSObject, NSMenuDelegate {
     private let hub: AgentHub
     private let chat: ChatService
     private let chatModel = ChatModel()
-    /// 자동 업데이트 (설정 updateURL의 update.json 기준)
+    /// 자동 업데이트 (설정 updateURL: GitHub 저장소 주소 또는 update.json)
     private lazy var updater = Updater(config: config)
+    /// 개발용 updatecheck 결과
+    private var updateCheckResult = "-"
 
     private var pet: PetActor!
     private var brain: Brain!
@@ -910,8 +912,8 @@ final class Director: NSObject, NSMenuDelegate {
 
     @objc private func checkUpdatesAction() { checkForUpdates(auto: false) }
 
-    /// updateURL의 update.json을 읽어 새 버전이면 카드로 알리고, [지금 업데이트]로 zip을 받아 앱을 교체·재시작한다.
-    /// 시작 20초 뒤와 주 1회 자동 확인한다. updateURL이 비어 있으면 아무것도 하지 않는다.
+    /// updateURL(GitHub 저장소 주소 또는 update.json)을 읽어 새 버전이면 카드로 알리고, [지금 업데이트]로 zip을 받아 앱을 교체·재시작한다.
+    /// 시작 20초 뒤와 주 1회 자동 확인한다 (기본: 공개 저장소). updateURL을 비우면("") 아무것도 하지 않는다.
     func checkForUpdates(auto: Bool) {
         Task { @MainActor in
             do {
@@ -1298,6 +1300,8 @@ final class Director: NSObject, NSMenuDelegate {
         applyTextStyle()
         world.config = c
         hub.config = c
+        // 업데이트 주소를 고친 뒤 [지금 확인]을 눌러도 새 주소로 (예전엔 처음 만든 설정을 계속 썼다)
+        updater.config = c
         defer {
             applyPerformance()
             applySystemState()
@@ -1696,6 +1700,17 @@ final class Director: NSObject, NSMenuDelegate {
                 return "watching \(Int(s))s"
             }
             return JSONValue.array(clipLog).encoded(pretty: true)
+        case "updatecheck":
+            // 개발용: 설치 없이 업데이트 확인만 (인자 없이 시작, "result"로 결과 읽기)
+            if arg == "result" { return updateCheckResult }
+            updateCheckResult = "running"
+            Task { @MainActor in
+                do {
+                    if let info = try await updater.check() { updateCheckResult = "newer \(info.version) \(info.url)" }
+                    else { updateCheckResult = "latest \(Updater.currentVersion) (url: \(updater.config.updateURL ?? "-"))" }
+                } catch { updateCheckResult = "error: \(error.localizedDescription)" }
+            }
+            return "started"
         case "cardsize":
             let f = card.panel.frame
             let p = hub.pending.first

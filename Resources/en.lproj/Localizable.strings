@@ -124,8 +124,10 @@
 "style.speech.prefix는 12자 이내" = "style.speech.prefix must be 12 characters or fewer";
 "style.speech.suffix는 8자 이내" = "style.speech.suffix must be 8 characters or fewer";
 "style.speech.tone은 200자 이내" = "style.speech.tone must be 200 characters or fewer";
-"update.json URL (예: https://example.com/pawmit/update.json)" = "update.json URL (e.g. https://example.com/pawmit/update.json)";
-"update.json을 읽을 수 없어요." = "Couldn't read update.json.";
+"저장소 주소 (https://github.com/owner/Pawmit) 또는 update.json URL" = "Repository URL (https://github.com/owner/Pawmit) or update.json URL";
+"GitHub 저장소 주소를 넣으면 최신 Release 태그와 첨부 zip(Pawmit-버전.zip)으로 확인해요." = "With a GitHub repository URL, it checks the latest release tag and its attached zip (Pawmit-<version>.zip).";
+"업데이트 정보를 읽을 수 없어요 (update.json 또는 GitHub Releases)." = "Couldn't read update info (update.json or GitHub Releases).";
+"최신 Release에 설치 zip이 없어요 (Pawmit-버전.zip을 첨부해 주세요)." = "The latest release has no install zip (attach Pawmit-<version>.zip).";
 "zip 안에 Pawmit.app이 없어요" = "Pawmit.app is missing from the zip";
 "zip 해제 실패" = "Failed to unzip";
 "~ %@ 덮어씀" = "~ overwrote %@";
