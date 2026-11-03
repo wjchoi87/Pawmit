@@ -387,7 +387,7 @@ final class Director: NSObject, NSMenuDelegate {
 
     private func maybeReportStatus() {
         guard Date() >= nextStatusReport else { return }
-        guard !brain.isHeld, !brain.isHome, !chatOpen, cardPendingID == nil, !pet.dragging else { return }
+        guard !brain.isHeld, !brain.isHome, !brain.isGoingHome, !chatOpen, cardPendingID == nil, !pet.dragging else { return }
         scheduleNextStatusReport()
         reportStatusNow()
     }

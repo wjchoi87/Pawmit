@@ -38,6 +38,9 @@ final class Brain {
 
     private var loopTask: Task<Void, Never>?
     private(set) var isHome = false
+    /// 집으로 걸어가는 중 (도착 전). 에이전트 알림이 이동을 끊지 않게 하는 데 쓴다.
+    private var goingHome = false
+    var isGoingHome: Bool { goingHome }
     private var homeReason: HomeReason = .tired
     private var homeSince = Date()
     private var holdCount = 0
@@ -121,12 +124,18 @@ final class Brain {
     }
 
     /// hook 요청 처리 중: 펫이 앉아서 기다린다
+    ///
+    /// 정책: 집에 있거나 집으로 들어가는 중이면 알림이 펫을 끌어내지 않는다.
+    /// 변경 전: pending이 생길 때마다 집에 있던 펫을 `comeOut()`으로 불러냈다.
+    /// 변경 후: 펫은 집에 그대로 있고, 알림 카드만 메뉴바 집 위에 뜬다.
+    /// 이유: 에이전트 stop/permission 이벤트가 잦아 "집에 가" 명령이 사실상 유지되지 않았다.
+    /// 영향: 집에 있는 동안 발생하는 모든 hook pending 표시(카드 위치는 houseAnchor 사용).
     func hold() {
         holdCount += 1
         guard holdCount == 1 else { return }
+        guard !isHome, !goingHome else { return }
         interrupt { [weak self] in
             guard let self else { return }
-            if self.isHome { await self.comeOut() }
             self.pet.target = nil
             self.pet.setAnim(.alert)
             self.pet.jump(height: 12)
@@ -138,6 +147,7 @@ final class Brain {
     func release(reaction: PetAnim? = nil) {
         holdCount = max(0, holdCount - 1)
         guard holdCount == 0 else { return }
+        guard !isHome, !goingHome else { return }
         interrupt { [weak self] in
             guard let self, let reaction else { return }
             self.pet.setAnim(reaction)
@@ -148,7 +158,7 @@ final class Brain {
 
     /// 짧은 반응 (지금 활동을 끊지 않음)
     func react(_ anim: PetAnim, seconds: TimeInterval = 1.2, jump: CGFloat = 0) {
-        guard !isHome else { return }
+        guard !isHome, !goingHome else { return }
         interrupt { [weak self] in
             guard let self else { return }
             self.pet.target = nil
@@ -586,6 +596,7 @@ final class Brain {
     /// 애니메이션 없이 바로 집에 있는 상태로 (앱 시작 시 복원)
     func markHome() {
         isHome = true
+        goingHome = false
         homeReason = .user
         homeSince = Date()
         pet.isHidden = true
@@ -593,8 +604,15 @@ final class Brain {
     }
 
     func goHome(reason: HomeReason) async -> Bool {
-        guard !isHome, let door = world.houseDoor(), let house = world.houseFrame() else { return true }
+        if isHome {
+            // 이미 집에 있으면 사용자가 다시 명령한 경우에만 이유를 갱신해 스스로 나오지 않게 한다
+            if reason == .user { homeReason = .user; homeSince = Date() }
+            return true
+        }
+        guard let door = world.houseDoor(), let house = world.houseFrame() else { return true }
         homeReason = reason
+        goingHome = true
+        defer { goingHome = false }
         say(reason == .user ? L10n.t("응, 집에 갈게~") : L10n.t("졸려… 집에서 잘래"), 2)
         let far = hypot(door.x - pet.position.x, door.y - pet.position.y) > 350
         guard await walk(to: door, run: far) else { return false }
@@ -625,6 +643,7 @@ final class Brain {
     func comeOut() async {
         guard isHome else { return }
         isHome = false
+        goingHome = false
         onHomeChanged(false)
         guard let house = world.houseFrame(), let door = world.houseDoor() else {
             pet.position = world.spawnPoint()

@@ -21,7 +21,8 @@ public enum ChatActions {
     public static func directCommand(_ text: String) -> String? {
         let t = text.replacingOccurrences(of: " ", with: "")
         let ko = L10n.isKorean
-        let homeWords = ko ? ["집에가", "집으로가", "들어가", "집에들어가", "가서자"] : ["gohome", "home", "gotobed"]
+        let homeWords = ko ? ["집에가", "집으로가", "집으로돌아가", "집에돌아가", "들어가", "집에들어가", "가서자"]
+                          : ["gohome", "gobackhome", "returnhome", "home", "gotobed"]
         let outWords = ko ? ["나와", "나와라", "나와봐"] : ["comeout", "getout", "outside"]
         if homeWords.contains(where: { t.contains($0) }) { return "home" }
         if outWords.contains(where: { t.hasPrefix($0) || t == $0 }) { return "out" }
