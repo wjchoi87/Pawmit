@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Pawmit.app 번들 만들기: ./scripts/build-app.sh  (CONFIG=debug 로 디버그 빌드, UNIVERSAL=1 로 arm64+x86_64)
 # 배포: UNIVERSAL=1 SIGN_IDENTITY="Developer ID Application: …" NOTARY_PROFILE=<notarytool 프로필> ./scripts/build-app.sh
-#   → Developer ID 서명·공증·staple 한 build/Pawmit-<버전>.zip 과 SHA-256
+#   → Developer ID 서명·공증·staple 한 build/Pawmit-<버전>.zip, build/Pawmit-<버전>.dmg 과 SHA-256
+#   zip은 앱 자동 업데이트가 내려받는 형식이고, dmg은 사람이 수동 설치/Homebrew용이다.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 CONFIG="${CONFIG:-release}"
@@ -74,5 +75,24 @@ spctl --assess --type execute -vv "$APP"
 # staple 한 앱으로 배포 zip 을 다시 만든다
 rm -f "$ZIP"
 ditto -c -k --keepParent "$APP" "$ZIP"
-shasum -a 256 "$ZIP"
+
+# 변경 전 정책: 배포물이 zip 하나뿐이었다. 자동 업데이트는 zip을 쓰지만 사람이 설치하기엔 dmg가 더 낯익다.
+# 변경 후 정책: staple 한 앱으로 dmg 도 만들어 공증·staple 한다. zip(자동 업데이트용) + dmg(수동 설치·Homebrew용).
+# 변경 이유: 수동 설치 경험 개선과 Homebrew cask 배포. dmg 안의 앱은 이미 staple 돼 있어
+#           dmg 자체를 공증하지 않아도 Gatekeeper 는 통과하지만, dmg 까지 공증하면 첫 실행 대화상자가 가장 깔끔하다.
+# 영향 범위: NOTARY_PROFILE 을 줄 때만 dmg 가 만들어진다 (ad-hoc/서명만 하는 로컬 빌드는 그대로).
+DMG="build/Pawmit-$VERSION.dmg"
+rm -f "$DMG"
+hdiutil create -volname "Pawmit" -srcfolder "$APP" -ov -format UDZO "$DMG" -quiet
+DMG_NOTARY_OUT="$(xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait 2>&1)" || true
+echo "$DMG_NOTARY_OUT"
+if ! grep -q "status: Accepted" <<<"$DMG_NOTARY_OUT"; then
+  echo "dmg 공증 실패 (zip 은 정상이니 zip 만 배포해도 동작한다)" >&2
+  exit 1
+fi
+xcrun stapler staple "$DMG"
+xcrun stapler validate "$DMG"
+
+shasum -a 256 "$ZIP" "$DMG"
 echo "notarized: $ZIP"
+echo "notarized: $DMG"

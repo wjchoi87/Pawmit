@@ -39,6 +39,14 @@ When an agent calls, it runs over, asks in a speech bubble, and handles allow / 
 
 Requires macOS 14 or later.
 
+### Homebrew
+
+```bash
+brew install --cask wjchoi87/tap/pawmit
+```
+
+When asked during installation, approve the trust prompt (this is a third-party tap).
+
 ### Download
 
 1. Grab `Pawmit-<version>.zip` from [Releases](https://github.com/wjchoi87/Pawmit/releases/latest).

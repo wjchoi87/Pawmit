@@ -39,6 +39,14 @@ macOS 데스크탑에 사는 펫이 **AI 코딩 에이전트의 승인·질문·
 
 요구 사항: macOS 14 이상
 
+### Homebrew
+
+```bash
+brew install --cask wjchoi87/tap/pawmit
+```
+
+설치 중 신뢰(trust) 확인이 나오면 승인해 주세요. 서드파티 tap이기 때문입니다.
+
 ### 다운로드
 
 1. [Releases](https://github.com/wjchoi87/Pawmit/releases/latest)에서 `Pawmit-<버전>.zip`을 받습니다.
