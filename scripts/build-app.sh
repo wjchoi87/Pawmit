@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Pawmit.app 번들 만들기: ./scripts/build-app.sh  (CONFIG=debug 로 디버그 빌드, UNIVERSAL=1 로 arm64+x86_64)
+# 배포: UNIVERSAL=1 SIGN_IDENTITY="Developer ID Application: …" NOTARY_PROFILE=<notarytool 프로필> ./scripts/build-app.sh
+#   → Developer ID 서명·공증·staple 한 build/Pawmit-<버전>.zip 과 SHA-256
 set -euo pipefail
 cd "$(dirname "$0")/.."
 CONFIG="${CONFIG:-release}"
@@ -29,7 +31,48 @@ for LPROJ in Resources/*.lproj; do
   [ -d "$LPROJ" ] && cp -R "$LPROJ" "$APP/Contents/Resources/"
 done
 
-# ad-hoc 서명 (로컬 실행용). 배포하려면 Developer ID로 다시 서명·공증해야 한다.
-codesign --force --sign - --timestamp=none "$APP/Contents/MacOS/pawmit-cli"
-codesign --force --sign - --timestamp=none "$APP"
-echo "built: $APP"
+# 서명
+# 변경 전 정책: 항상 ad-hoc 서명. 배포 zip도 공증 없이 올려 첫 실행 때 "그래도 열기"가 필요했다.
+# 변경 후 정책: SIGN_IDENTITY 를 주면 hardened runtime·보안 타임스탬프·Resources/Pawmit.entitlements 로 Developer ID 서명,
+#   NOTARY_PROFILE 까지 주면 공증 → staple → build/Pawmit-<버전>.zip 을 만든다. 둘 다 없으면 예전처럼 ad-hoc.
+# 변경 이유: Gatekeeper 경고 없이 설치·자동 업데이트되게 (자동 업데이트는 zip 안의 Pawmit.app 을 그대로 쓴다).
+# 영향 범위: 배포 빌드. hardened runtime 에서는 앱 안 NSAppleScript(터미널 탭 이동)에 apple-events entitlement 가 필요하다.
+SIGN_IDENTITY="${SIGN_IDENTITY:-}"
+NOTARY_PROFILE="${NOTARY_PROFILE:-}"
+if [ -n "$NOTARY_PROFILE" ] && [ -z "$SIGN_IDENTITY" ]; then
+  echo "NOTARY_PROFILE 은 SIGN_IDENTITY(Developer ID Application)와 함께 써야 해요" >&2
+  exit 1
+fi
+if [ -z "$SIGN_IDENTITY" ]; then
+  # ad-hoc 서명 (로컬 실행용)
+  codesign --force --sign - --timestamp=none "$APP/Contents/MacOS/pawmit-cli"
+  codesign --force --sign - --timestamp=none "$APP"
+  echo "built: $APP"
+  exit 0
+fi
+
+# 안쪽(CLI)부터 서명한다
+codesign --force --sign "$SIGN_IDENTITY" --options runtime --timestamp "$APP/Contents/MacOS/pawmit-cli"
+codesign --force --sign "$SIGN_IDENTITY" --options runtime --timestamp --entitlements Resources/Pawmit.entitlements "$APP"
+codesign --verify --strict --deep "$APP"
+echo "signed: $APP"
+if [ -z "$NOTARY_PROFILE" ]; then exit 0; fi
+
+VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
+ZIP="build/Pawmit-$VERSION.zip"
+rm -f "$ZIP"
+ditto -c -k --keepParent "$APP" "$ZIP"
+NOTARY_OUT="$(xcrun notarytool submit "$ZIP" --keychain-profile "$NOTARY_PROFILE" --wait 2>&1)" || true
+echo "$NOTARY_OUT"
+if ! grep -q "status: Accepted" <<<"$NOTARY_OUT"; then
+  echo "공증 실패 (xcrun notarytool log <id> --keychain-profile $NOTARY_PROFILE 로 사유 확인)" >&2
+  exit 1
+fi
+xcrun stapler staple "$APP"
+xcrun stapler validate "$APP"
+spctl --assess --type execute -vv "$APP"
+# staple 한 앱으로 배포 zip 을 다시 만든다
+rm -f "$ZIP"
+ditto -c -k --keepParent "$APP" "$ZIP"
+shasum -a 256 "$ZIP"
+echo "notarized: $ZIP"

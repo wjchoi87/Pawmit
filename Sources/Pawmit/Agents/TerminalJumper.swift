@@ -7,6 +7,12 @@ import PawmitCore
 /// 그 세션으로 이동. Claude 데스크탑·Codex 앱 안 세션이면 그 대화를 바로 연다
 /// (claude://code/continue?session=…, codex://threads/<id>). 아니면 tmux → iTerm2 → Terminal.app → kitty → IDE 작업공간 → 앱 활성화 순.
 enum TerminalJumper {
+    /*
+     * 변경 전 정책: 터미널 힌트(TERM_PROGRAM·앱 bundle·tmux)가 없으면 아무것도 열지 않았다.
+     * 변경 후 정책: xita 알림인데 터미널 힌트가 없으면 Xita.app을 연다.
+     * 변경 이유: xita 데몬이 돌리는 웹·데스크탑 채팅과 작업 터미널은 Xita.app 안에 있어 갈 터미널 앱이 없다.
+     * 영향 범위: agent == .xita이고 터미널 힌트가 없는 알림의 "터미널에서" 버튼. 터미널에서 띄운 xita는 기존 순서대로 간다.
+     */
     static func jump(_ env: HookEnvelope, cwd: String?) {
         let hint = env.env
         let tty = env.tty
@@ -32,6 +38,11 @@ enum TerminalJumper {
                 } else {
                     activate(AppSessions.codexAppBundle)
                 }
+                return
+            }
+            if AgentKind(loose: env.agent) == .xita, program.isEmpty, bundle.isEmpty, hint["TMUX_PANE"] == nil {
+                Log.info("terminal jump → Xita 앱 (터미널 힌트 없음)")
+                activate(AppSessions.xitaAppBundle)
                 return
             }
             if let pane = hint["TMUX_PANE"], isSafe(pane) {

@@ -92,6 +92,7 @@
 "With “Always Allow”, Pawmit won't ask about %@ again" = "With “Always Allow”, Pawmit won't ask about %@ again";
 "Z 뒤 숫자" = "number after Z";
 "ZCode를 다시 시작하면 적용돼요. (사용자 설정 ~/.zcode/cli/config.json의 hooks에 들어가요)" = "Takes effect after restarting ZCode. (Added to hooks in your user settings ~/.zcode/cli/config.json)";
+"xita는 승인 대기·작업 끝 알림과 작업 끝 답장을 받아요. 승인은 xita에서 해요. 새로 여는 xita 세션부터 적용돼요." = "xita sends approval-wait and task-done notifications, and you can reply when a task ends. Approve in xita itself. Takes effect in new xita sessions.";
 "base '%@'는 기본 펫 id가 아닙니다 (%@)" = "base '%@' is not a built-in pet id (%@)";
 "body(몸) 부위가 필요합니다" = "A body part is required";
 "claude CLI를 찾지 못했어요. 설정에서 경로를 지정해 주세요." = "Couldn't find the claude CLI. Set its path in Settings.";

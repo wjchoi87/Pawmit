@@ -2,7 +2,7 @@ import Foundation
 
 /// 지원하는 코딩 에이전트. 새 에이전트는 여기와 `AgentAdapters`에 추가한다.
 public enum AgentKind: String, Codable, CaseIterable, Sendable {
-    case claude, codex, cursor, gemini, copilot, opencode, kiro, droid, qwen, zcode, generic
+    case claude, codex, cursor, gemini, copilot, opencode, kiro, droid, qwen, zcode, xita, generic
 
     public init(loose raw: String) {
         let key = raw.lowercased()
@@ -33,6 +33,7 @@ public enum AgentKind: String, Codable, CaseIterable, Sendable {
         case .droid: return "Droid"
         case .qwen: return "Qwen Code"
         case .zcode: return "ZCode"
+        case .xita: return "xita"
         case .generic: return "Agent"
         }
     }

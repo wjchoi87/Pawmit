@@ -12,7 +12,7 @@ When an agent calls, it runs over, asks in a speech bubble, and handles allow / 
 
 | Area | Details |
 |---|---|
-| Agent integration | Claude Code, Codex, ZCode(Z.ai), Copilot CLI, Qwen Code, Factory Droid, and Cursor approve/deny right from the pet. Gemini CLI, OpenCode, and Kiro get status and notifications only |
+| Agent integration | Claude Code, Codex, ZCode(Z.ai), Copilot CLI, Qwen Code, Factory Droid, and Cursor approve/deny right from the pet. xita sends approval-wait notices and takes replies after tasks. Gemini CLI, OpenCode, and Kiro get status and notifications only |
 | Speech bubbles | Command approval (full text, risky-command warnings, always allow), AskUserQuestion answers, plan (ExitPlanMode) approve / request changes, and a reply box after each task to keep it going (clicking the box pauses the wait timer). Markdown bodies (headings, lists, code, tables), separate fonts and sizes for hook alerts and chat, the name the pet calls you (leave empty for a default) |
 | Pets | Six built-in pets (Mongle, Banban, Tokki, Nalda, Bamtol, Haedal) + a four-legged cat (Cheese) + your own pets made with **Pet Maker** + image and Codex pets. Personality, speech style, and colors are styles; share pets as `.pawmitpet` files |
 | Behavior | A personality picked at birth — 8 kinds (lively, curious, sweet, artistic, mischievous, gluttonous, laid-back, tidy) — changes movement, gait, actions, moods, and lines |
@@ -43,11 +43,8 @@ Requires macOS 14 or later.
 
 1. Grab `Pawmit-<version>.zip` from [Releases](https://github.com/wjchoi87/Pawmit/releases/latest).
 2. Unzip it and move `Pawmit.app` into `/Applications` so "launch at login" works reliably.
-3. The app is not notarized by Apple, so macOS blocks the first launch. Click "Open Anyway" in **System Settings → Privacy & Security**, or run this once in Terminal:
 
-```bash
-xattr -dr com.apple.quarantine /Applications/Pawmit.app
-```
+The app is signed with a Developer ID and notarized by Apple, so it opens right away (since 0.2.3).
 
 ### Build from source
 
@@ -56,6 +53,12 @@ Requires Swift 6 (Xcode or Command Line Tools).
 ```bash
 ./scripts/build-app.sh
 open build/Pawmit.app
+```
+
+Release build (universal, Developer ID signed, notarized and stapled → `build/Pawmit-<version>.zip`):
+
+```bash
+UNIVERSAL=1 SIGN_IDENTITY="Developer ID Application: …" NOTARY_PROFILE=<notarytool profile> ./scripts/build-app.sh
 ```
 
 The first launch installs the `~/.pawmit/bin/pawmit` CLI. All data lives in `~/.pawmit/`.
@@ -75,6 +78,7 @@ Menu bar house → **Settings… → Agents**, click "Connect": it shows what wi
 | Gemini CLI | `~/.gemini/settings.json` | Status and notifications |
 | OpenCode | `~/.config/opencode/plugins/pawmit.js` | Status and notifications |
 | ZCode (Z.ai) | `~/.zcode/cli/config.json` (`hooks.events`, process hook) | Approve/deny/always allow, reply after tasks (takes effect after a ZCode restart) |
+| xita | `$XITA_HOME/harness/hooks.d/zz-pawmit.toml` (default `~/.xita`) | Approval-wait notices (approve in xita), task-done notices and replies (only xita started in a terminal waits for a reply; applies to new sessions) |
 | Kiro CLI | Add to the agent config yourself (instructions provided) | Status |
 
 If the app is closed or the wait timer expires, the hook prints nothing and you fall through to your **normal terminal prompt**.

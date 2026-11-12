@@ -85,13 +85,14 @@ func runHook(_ rest: [String]) -> Int32 {
     if payload.object == nil { payload = .object(["raw": .string(String(decoding: input, as: UTF8.self))]) }
     let event = (rest.count > 1 ? rest[1] : nil) ?? payload["hook_event_name"]?.string ?? "Unknown"
 
-    let interactive = AgentAdapters.isInteractiveCandidate(agent: agent, event: event, payload: payload)
+    let tty = controllingTTY()
+    let interactive = AgentAdapters.isInteractiveCandidate(agent: agent, event: event, payload: payload, hasTerminal: tty != nil)
     let config = PawmitConfig.load()
     // 앱이 응답을 못 줘도 에이전트 hook timeout(600초)보다 먼저 끝나야 기본 프롬프트로 넘어간다
     let wait: Double = interactive ? max(config.permissionTimeoutSeconds, config.stopReplySeconds) + 15 : 3
 
     let envelope = HookEnvelope(agent: agent.rawValue, event: event, expectsReply: interactive,
-                                pid: getpid(), ppid: getppid(), tty: controllingTTY(), env: terminalEnv(),
+                                pid: getpid(), ppid: getppid(), tty: tty, env: terminalEnv(),
                                 cwd: FileManager.default.currentDirectoryPath, payload: payload, waitSeconds: wait)
 
     let client = UnixSocketClient()
@@ -610,7 +611,7 @@ default:
       pawmit pet <list|new|show|validate|preview|export|import|use>   펫 만들기·주고받기
       pawmit hook <agent> [event]           (에이전트 hook 전용)
 
-    agent: claude codex gemini qwen droid cursor copilot opencode kiro
+    agent: claude codex gemini qwen droid cursor copilot opencode kiro xita
     """ : """
     pawmit — agent hookup tool for the Pawmit desktop pet
 
@@ -622,7 +623,7 @@ default:
       pawmit pet <list|new|show|validate|preview|export|import|use>   create & share pets
       pawmit hook <agent> [event]           (for agent hooks only)
 
-    agent: claude codex gemini qwen droid cursor copilot opencode kiro
+    agent: claude codex gemini qwen droid cursor copilot opencode kiro xita
     """)
     code = command == "help" || command == "--help" ? 0 : 2
 }

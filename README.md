@@ -12,7 +12,7 @@ macOS 데스크탑에 사는 펫이 **AI 코딩 에이전트의 승인·질문·
 
 | 영역 | 내용 |
 |---|---|
-| 에이전트 연동 | Claude Code, Codex, ZCode(Z.ai), Copilot CLI, Qwen Code, Factory Droid, Cursor도 펫에서 승인·거절. Gemini CLI·OpenCode·Kiro는 상태·알림만 |
+| 에이전트 연동 | Claude Code, Codex, ZCode(Z.ai), Copilot CLI, Qwen Code, Factory Droid, Cursor도 펫에서 승인·거절. xita는 승인 대기 알림과 작업 끝 답장. Gemini CLI·OpenCode·Kiro는 상태·알림만 |
 | 말풍선 | 명령 승인(전문 표시·위험 경고·항상 허용), AskUserQuestion 답변, 계획(ExitPlanMode) 승인·수정 요청, 작업 끝나면 답장으로 이어서 시키기(입력칸을 누르면 대기 시간 멈춤). 본문 마크다운(제목·목록·코드·표), hook 알림·대화 글꼴·크기 따로 설정, 펫이 부르는 내 호칭(비우면 ‘사용자’) |
 | 펫 | 기본 펫 6종(몽글이·반반이·토깽이·날다람·밤톨이·해달이) + 사족 고양이 + **펫 메이커**로 만든 나만의 펫 + 그림·Codex 펫. 성격·말투·색은 스타일로 정하고, `.pawmitpet` 파일로 주고받기 |
 | 행동 | 태어날 때 정해지는 성격 8가지(활발·호기심·다정·예술·장난·식탐·느긋·깔끔)에 따라 이동 패턴·걸음걸이·동작·감정·대사가 달라짐 |
@@ -43,11 +43,8 @@ macOS 데스크탑에 사는 펫이 **AI 코딩 에이전트의 승인·질문·
 
 1. [Releases](https://github.com/wjchoi87/Pawmit/releases/latest)에서 `Pawmit-<버전>.zip`을 받습니다.
 2. 압축을 풀고 `Pawmit.app`을 `/Applications`로 옮깁니다. 그래야 "로그인 시 실행"이 안정적으로 동작합니다.
-3. Apple 공증을 받지 않은 앱이라 처음 열 때 macOS가 막습니다. **시스템 설정 → 개인정보 보호 및 보안**에서 "그래도 열기"를 누르거나, 터미널에서 아래 명령을 한 번 실행하세요.
 
-```bash
-xattr -dr com.apple.quarantine /Applications/Pawmit.app
-```
+Developer ID로 서명하고 Apple 공증을 받은 앱이라 바로 열립니다 (0.2.3부터).
 
 ### 소스에서 빌드
 
@@ -56,6 +53,12 @@ Swift 6(Xcode 또는 Command Line Tools)이 필요합니다.
 ```bash
 ./scripts/build-app.sh
 open build/Pawmit.app
+```
+
+배포 빌드(universal, Developer ID 서명·공증·staple → `build/Pawmit-<버전>.zip`):
+
+```bash
+UNIVERSAL=1 SIGN_IDENTITY="Developer ID Application: …" NOTARY_PROFILE=<notarytool 프로필> ./scripts/build-app.sh
 ```
 
 처음 실행하면 `~/.pawmit/bin/pawmit` CLI가 설치됩니다. 모든 데이터는 `~/.pawmit/` 에 있습니다.
@@ -76,6 +79,7 @@ open build/Pawmit.app
 | Gemini CLI | `~/.gemini/settings.json` | 상태·알림 |
 | OpenCode | `~/.config/opencode/plugins/pawmit.js` | 상태·알림 |
 | ZCode(Z.ai) | `~/.zcode/cli/config.json`(`hooks.events`, process hook) | 승인·거절·항상 허용, 작업 끝 답장(ZCode 재시작 후 적용) |
+| xita | `$XITA_HOME/harness/hooks.d/zz-pawmit.toml`(기본 `~/.xita`) | 승인 대기 알림(승인은 xita에서), 작업 끝 알림·답장(터미널에서 띄운 xita만 답장을 기다림, 새 세션부터 적용) |
 | Kiro CLI | 에이전트 설정에 직접 추가(안내 문구 제공) | 상태 |
 
 앱이 꺼져 있거나 대기 시간이 지나면 hook은 아무것도 출력하지 않고 끝나서 **원래 터미널 프롬프트**로 넘어갑니다.

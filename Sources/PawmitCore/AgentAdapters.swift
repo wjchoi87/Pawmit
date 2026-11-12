@@ -36,7 +36,15 @@ public enum AgentAdapters {
 
     /// CLI가 앱 응답을 오래 기다려야 할 수 있는 이벤트인지. 실제로 말풍선을 띄울지는 앱이 결정하고,
     /// 띄우지 않으면 즉시 pass를 돌려준다.
-    public static func isInteractiveCandidate(agent: AgentKind, event: String, payload: JSONValue) -> Bool {
+    /*
+     * 변경 전 정책: 기다릴지는 에이전트와 이벤트만 보고 정했다.
+     * 변경 후 정책: xita의 Stop(작업 끝 답장)은 hook을 부른 xita에 제어 터미널이 있을 때(`hasTerminal`)만 기다린다.
+     *   터미널이 없으면 끝남 알림만 보내고 바로 넘긴다.
+     * 변경 이유: xita는 stop hook이 끝나야 턴을 닫는다. 데몬(xitad)이 돌리는 웹·데스크탑 채팅 세션에는 터미널이 없는데,
+     *   다른 기기(xita 웹)에서 보낸 턴이 맥의 답장 대기 시간만큼 멈추면 안 된다.
+     * 영향 범위: xita의 Stop만. 다른 에이전트는 `hasTerminal`을 보지 않는다(기본값 true).
+     */
+    public static func isInteractiveCandidate(agent: AgentKind, event: String, payload: JSONValue, hasTerminal: Bool = true) -> Bool {
         let ev = canonicalEvent(event, agent: agent)
         switch ev {
         case "PermissionRequest":
@@ -48,6 +56,7 @@ public enum AgentAdapters {
             if agent == .claude { return tool == "AskUserQuestion" || tool == "ExitPlanMode" }
             return agent == .droid
         case "Stop":
+            if agent == .xita, !hasTerminal { return false }
             return supportsStopReply(agent)
         default:
             return false
@@ -55,8 +64,15 @@ public enum AgentAdapters {
     }
 
     /// ZCode(Z.ai)는 Claude Code와 같은 hook 입출력(hookSpecificOutput·decision: block)을 쓴다 (ZCode 0.x 번들의 hook 스키마로 확인)
+    /*
+     * 변경 전 정책: 작업 끝 답장은 Claude Code·Codex·Qwen·Droid·Cursor·ZCode만 받았다.
+     * 변경 후 정책: xita도 답장을 받는다. xita stop hook은 stdout `{"decision":"block","reason":…}`을 받으면
+     *   reason을 사용자 메시지로 남기고 턴을 이어 간다(xita-harness `kit.rs` `stop_block`, Claude Code Stop과 같은 형식).
+     * 변경 이유: xita 알림도 다른 에이전트처럼 펫에서 받고 답하게 하려고.
+     * 영향 범위: agent == .xita인 Stop 이벤트의 답장 출력.
+     */
     public static func supportsStopReply(_ agent: AgentKind) -> Bool {
-        [.claude, .codex, .qwen, .droid, .cursor, .zcode].contains(agent)
+        [.claude, .codex, .qwen, .droid, .cursor, .zcode, .xita].contains(agent)
     }
 
     /// 앱이 없거나 응답이 없을 때 stdout에 낼 내용. nil이면 아무것도 출력하지 않는다(= 에이전트 기본 동작).
@@ -126,6 +142,11 @@ public enum AgentAdapters {
             event.kind = .notification
             if agent == .gemini, event.notificationType == "ToolPermission" {
                 event.message = event.message ?? L10n.t("도구 실행 승인을 기다리고 있어요")
+            }
+            // xita 승인 알림은 영어 고정 문구라, 도구 이름과 요약(`summary`: 실행할 명령 등)으로 다시 쓴다
+            if agent == .xita, event.notificationType == "permission_prompt" {
+                let what = [tool, p["summary"]?.string].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+                event.message = L10n.t("도구 실행 승인을 기다리고 있어요") + (what.isEmpty ? "" : "\n" + what)
             }
         case "Stop":
             event.kind = .stop

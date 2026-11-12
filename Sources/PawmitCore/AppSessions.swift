@@ -9,6 +9,8 @@ import Foundation
 public enum AppSessions {
     public static let claudeDesktopBundle = "com.anthropic.claudefordesktop"
     public static let codexAppBundle = "com.openai.codex"
+    /// Xita.app (xita 데스크탑). 데몬이 돌리는 채팅·작업 터미널이 이 앱 안에 있다.
+    public static let xitaAppBundle = "app.xita.desktop"
 
     public static var claudeSessionsRoot: URL {
         FileManager.default.homeDirectoryForCurrentUser

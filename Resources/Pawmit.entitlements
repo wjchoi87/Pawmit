@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 터미널 탭 이동(TerminalJumper)이 앱 안에서 NSAppleScript로 iTerm2·Terminal을 조작한다.
+	     공증용 hardened runtime에서는 이 권한이 없으면 Apple Event가 막힌다. -->
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
+</dict>
+</plist>

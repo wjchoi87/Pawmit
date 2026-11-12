@@ -14,6 +14,7 @@ enum AgentIcons {
         case .cursor: return ["com.todesktop.230313mzl4w4u92"]
         case .kiro: return ["dev.kiro.desktop", "com.amazon.codewhisperer"]
         case .zcode: return ["dev.zcode.app"]
+        case .xita: return [AppSessions.xitaAppBundle]
         case .gemini, .copilot, .opencode, .droid, .qwen, .generic: return []
         }
     }
@@ -31,6 +32,7 @@ enum AgentIcons {
         case .droid: return ("cpu", "D")
         case .qwen: return (nil, "Q")
         case .zcode: return (nil, "Z")
+        case .xita: return (nil, "x")
         case .generic: return ("pawprint.fill", "A")
         }
     }

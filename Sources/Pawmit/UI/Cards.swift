@@ -84,6 +84,7 @@ extension PawTheme {
         case .opencode: return Color(red: 0.2, green: 0.6, blue: 0.55)
         case .kiro: return Color(red: 0.55, green: 0.4, blue: 0.95)
         case .zcode: return Color(red: 0.18, green: 0.42, blue: 0.95)
+        case .xita: return Color(red: 0.12, green: 0.5, blue: 0.36)
         case .generic: return .gray
         }
     }
