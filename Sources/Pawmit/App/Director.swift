@@ -133,7 +133,15 @@ final class Director: NSObject, NSMenuDelegate {
         }
         wireInput(pet, brain: brain, main: true)
         card.anchor = { [weak self] in self?.pet.isHidden == false ? self?.pet.steadyHeadTopGlobal : self?.houseAnchor }
-        card.lowAnchor = { [weak self] in self.map { CGPoint(x: $0.pet.position.x, y: $0.pet.position.y - 6) } }
+        // 변경 전: 말풍선이 아래로 뒤집힐 때(lowAnchor) 숨은 펫의 마지막 위치를 그대로 썼다.
+        // 변경 후: 펫이 집에 들어가 있으면 메뉴바 집 아래면(houseAnchor) 기준으로 내린다.
+        // 이유: 집에 들어간 펫의 position은 메뉴바 안쪽 좌표라 알림이 메뉴바를 덮었고,
+        //       앱 재시작으로 집 상태가 복원된 경우엔 엉뚱한 옛 위치에 떴다.
+        // 영향: 집에 있는 동안 뜨는 카드·말풍선 전부가 메뉴바 바로 밑에 붙는다.
+        card.lowAnchor = { [weak self] in
+            guard let self, self.pet.isHidden == false else { return self?.houseAnchor }
+            return CGPoint(x: self.pet.position.x, y: self.pet.position.y - 6)
+        }
         speech.anchor = card.anchor
         speech.lowAnchor = card.lowAnchor
         card.panel.onCancel = { [weak self] in self?.cancelCard() }
