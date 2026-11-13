@@ -116,8 +116,15 @@ final class BubbleController {
         if force {
             host.layoutSubtreeIfNeeded()
             let fit = host.fittingSize
+            // 변경 전 정책: 측정값을 그대로 창 크기로 썼다.
+            // 변경 후 정책: 화면(보이는 영역)보다 크면 그 크기로 잘라낸다.
+            // 변경 이유: 폭 제한이 없던 업데이트 카드가 2192×17125 창이 되어 커서를 덮었고,
+            //           펫이 frozen으로 멈추고 WindowServer가 거대한 창을 합성하느라 시스템이 버벅였다.
+            // 영향 범위: 모든 카드·말풍선 창의 크기 상한. 정상 크기(≤380pt 폭)에는 변화 없음.
+            let vf = (NSScreen.screens.first { $0.frame.contains(anchor() ?? .zero) } ?? NSScreen.main)?.visibleFrame ?? .infinite
+            let cap = CGSize(width: max(vf.width - 12, 120), height: max(vf.height - 12, 120))
             // 정수로 올리고 1pt 미만 변화는 무시 (글자 측정 오차로 창이 매초 들썩이지 않게)
-            let size = CGSize(width: ceil(fit.width), height: ceil(fit.height))
+            let size = CGSize(width: min(ceil(fit.width), cap.width), height: min(ceil(fit.height), cap.height))
             if size.width > 0, abs(size.width - lastSize.width) >= 1 || abs(size.height - lastSize.height) >= 1 {
                 lastSize = size
                 panel.setContentSize(size)

@@ -645,28 +645,43 @@ struct UpdateCard: View {
     var onInstall: () -> Void
     var onClose: () -> Void
 
+    /*
+     변경 전 정책: 카드 본문을 폭 제한 없이 그렸다. 릴리스 노트가 길면 NSHostingView.fittingSize가
+                  화면을 넘는 크기(2192×17125)를 돌려주고, 그 크기가 그대로 창 크기가 됐다.
+     변경 후 정책: 다른 카드처럼 BubbleFrame(width:)으로 폭을 고정하고, 릴리스 노트는 높이를 제한한
+                  ScrollBox 안에서 스크롤한다.
+     변경 이유: 업데이트 알림을 띄운 순간 거대한 카드 창이 커서를 덮어 펫이 frozen 상태로 멈췄고,
+                  WindowServer가 37MP 창을 합성하느라 시스템이 버벅였다.
+     영향 범위: 업데이트 알림 카드의 폭(340pt)·노트 높이 상한(220pt). 다른 카드에는 영향 없음.
+     */
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkles")
-                Text(L10n.format("Pawmit %@ 나왔어요", model.info.version)).font(PawTheme.font(13, .bold))
-                Spacer()
-            }
-            if let notes = model.info.notes, !notes.isEmpty {
-                Text(notes).font(PawTheme.font(11.5)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            }
-            if let status = model.status {
-                Text(status).font(PawTheme.font(11)).foregroundStyle(.tertiary)
-            }
-            HStack {
-                Spacer()
-                Button(action: onClose) { Text("나중에") }.buttonStyle(PawButton(kind: .outline(PawTheme.neutral)))
-                    .disabled(model.installing)
-                Button(action: onInstall) { Text("지금 업데이트") }.buttonStyle(PawButton(kind: .primary(PawTheme.terminal)))
-                    .disabled(model.installing)
+        BubbleFrame(width: PawTheme.w(340)) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                    Text(L10n.format("Pawmit %@ 나왔어요", model.info.version)).font(PawTheme.font(13, .bold))
+                    Spacer()
+                }
+                if let notes = model.info.notes, !notes.isEmpty {
+                    ScrollBox(maxHeight: PawTheme.w(220)) {
+                        Text(notes)
+                            .font(PawTheme.font(11.5))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                if let status = model.status {
+                    Text(status).font(PawTheme.font(11)).foregroundStyle(.tertiary)
+                }
+                HStack {
+                    Spacer()
+                    Button(action: onClose) { Text("나중에") }.buttonStyle(PawButton(kind: .outline(PawTheme.neutral)))
+                        .disabled(model.installing)
+                    Button(action: onInstall) { Text("지금 업데이트") }.buttonStyle(PawButton(kind: .primary(PawTheme.terminal)))
+                        .disabled(model.installing)
+                }
             }
         }
-        .padding(14)
     }
 }
 
